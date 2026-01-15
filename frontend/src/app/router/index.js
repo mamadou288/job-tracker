@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import BoardPage from '@/pages/BoardPage.vue'
+import BoardPage from '../../pages/BoardPage.vue'
+
 
 const routes = [
   {
