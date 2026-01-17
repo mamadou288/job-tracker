@@ -36,8 +36,8 @@ defineProps({
 .kpi-card {
   background-color: var(--card-bg, #2d2d2d);
   border: 1px solid var(--border-color, #3d3d3d);
-  border-radius: 8px;
-  padding: 1.5rem;
+  border-radius: 6px;
+  padding: 0.75rem;
   transition: all 0.2s ease;
   cursor: default;
 }
@@ -45,19 +45,17 @@ defineProps({
 .kpi-card:hover {
   background-color: var(--card-hover-bg, #353535);
   border-color: var(--accent-color, #646cff);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .kpi-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .kpi-title {
-  font-size: 0.75rem;
+  font-size: 0.625rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -66,24 +64,24 @@ defineProps({
 }
 
 .kpi-icon {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   background-color: var(--input-bg, #3d3d3d);
   border-radius: 4px;
 }
 
 .kpi-value {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-primary, #ffffff);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   line-height: 1;
 }
 
 .kpi-subtitle {
-  font-size: 0.75rem;
+  font-size: 0.625rem;
   color: var(--text-secondary, #999);
-  margin-top: 0.5rem;
+  margin-top: 0.25rem;
 }
 </style>
 

@@ -359,8 +359,10 @@ function closePasswordModal() {
 
     .main-content {
     flex: 1;
-    overflow-y: auto;
+    overflow: hidden;
     background-color: var(--bg-primary, #1a1a1a);
+    display: flex;
+    flex-direction: column;
     }
 </style>
 

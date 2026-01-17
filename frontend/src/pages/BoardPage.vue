@@ -64,8 +64,39 @@ function goToStatistics() {
       <h1 class="page-title">Board</h1>
     </div>
 
-    <!-- KPI Summary Section -->
+    <!-- Add Form Section - Compact -->
+    <div class="add-form-section">
+      <h2 class="section-title">Ajouter une candidature</h2>
+      <div class="add-form-container">
+        <form @submit.prevent="submit" class="add-form">
+          <input 
+            v-model="company" 
+            placeholder="Entreprise" 
+            class="form-input"
+            required
+          />
+          <input 
+            v-model="title" 
+            placeholder="Poste" 
+            class="form-input"
+            required
+          />
+          <select 
+            v-model="selectedStatus" 
+            class="form-select"
+          >
+            <option v-for="status in STATUSES" :key="status.key" :value="status.key">
+              {{ status.label }}
+            </option>
+          </select>
+          <button type="submit" class="form-button">Ajouter</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- KPI Summary Section - Compact -->
     <div class="kpi-section">
+      <h2 class="section-title">Statistiques</h2>
       <div class="kpi-grid">
         <KPICard
           title="Total Candidatures"
@@ -99,33 +130,10 @@ function goToStatistics() {
       </div>
     </div>
 
-    <div class="add-form-container">
-      <form @submit.prevent="submit" class="add-form">
-        <input 
-          v-model="company" 
-          placeholder="Entreprise" 
-          class="form-input"
-          required
-        />
-        <input 
-          v-model="title" 
-          placeholder="Poste" 
-          class="form-input"
-          required
-        />
-        <select 
-          v-model="selectedStatus" 
-          class="form-select"
-        >
-          <option v-for="status in STATUSES" :key="status.key" :value="status.key">
-            {{ status.label }}
-          </option>
-        </select>
-        <button type="submit" class="form-button">Ajouter</button>
-      </form>
-    </div>
-
-    <div class="board">
+    <!-- Board Section - Main Focus -->
+    <div class="board-section">
+      <h2 class="section-title">Tableau des candidatures</h2>
+      <div class="board">
       <div 
         v-for="status in STATUSES" 
         :key="status.key" 
@@ -148,6 +156,7 @@ function goToStatistics() {
         </div>
       </div>
     </div>
+    </div>
 
     <ApplicationDetailModal
       :application="selectedApplication"
@@ -159,42 +168,70 @@ function goToStatistics() {
 
 <style scoped>
 .board-page {
-  padding: 2rem;
+  padding: 1.5rem;
   min-height: 100%;
   background-color: var(--bg-primary, #1a1a1a);
   color: var(--text-primary, #ffffff);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .page-header {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .page-title {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 600;
   margin: 0;
   color: var(--text-primary, #ffffff);
 }
 
-.kpi-section {
-  margin-bottom: 2rem;
-  padding: 1.5rem;
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  color: var(--text-primary, #ffffff);
+}
+
+.add-form-section {
+  margin-bottom: 1rem;
+}
+
+.add-form-container {
+  padding: 1rem;
   background-color: var(--card-bg, #2d2d2d);
   border: 1px solid var(--border-color, #3d3d3d);
   border-radius: 8px;
 }
 
+.kpi-section {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: var(--card-bg, #2d2d2d);
+  border: 1px solid var(--border-color, #3d3d3d);
+  border-radius: 8px;
+}
+
+.board-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
 .kpi-actions {
   display: flex;
   justify-content: center;
-  padding-top: 1rem;
+  padding-top: 0.75rem;
   border-top: 1px solid var(--border-color, #3d3d3d);
 }
 
@@ -202,9 +239,9 @@ function goToStatistics() {
   background: none;
   border: 1px solid var(--accent-color, #646cff);
   color: var(--accent-color, #646cff);
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.875rem;
   border-radius: 6px;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -213,14 +250,6 @@ function goToStatistics() {
 .view-stats-button:hover {
   background-color: var(--accent-color, #646cff);
   color: var(--text-primary, #ffffff);
-}
-
-.add-form-container {
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  background-color: var(--card-bg, #2d2d2d);
-  border: 1px solid var(--border-color, #3d3d3d);
-  border-radius: 8px;
 }
 
 .add-form {
@@ -288,32 +317,37 @@ function goToStatistics() {
 
 .board {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   overflow-x: auto;
   padding-bottom: 1rem;
+  flex: 1;
+  min-height: 0;
+  margin-top: 0.75rem;
 }
 
 .board-column {
   flex: 1;
-  min-width: 280px;
+  min-width: 250px;
   background-color: var(--card-bg, #2d2d2d);
   border: 1px solid var(--border-color, #3d3d3d);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 300px);
+  height: 100%;
+  max-height: 100%;
 }
 
 .column-header {
-  padding: 1rem;
+  padding: 0.75rem;
   border-bottom: 1px solid var(--border-color, #3d3d3d);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-shrink: 0;
 }
 
 .column-title {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -322,18 +356,18 @@ function goToStatistics() {
 }
 
 .column-count {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: var(--text-secondary, #999);
   background-color: var(--input-bg, #3d3d3d);
-  padding: 0.25rem 0.5rem;
+  padding: 0.2rem 0.4rem;
   border-radius: 12px;
 }
 
 .column-content {
   flex: 1;
-  padding: 1rem;
+  padding: 0.75rem;
   overflow-y: auto;
-  min-height: 200px;
+  min-height: 0;
 }
 
 /* Drag and drop styles */
