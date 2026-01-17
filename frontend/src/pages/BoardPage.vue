@@ -18,10 +18,15 @@ const router = useRouter()
 
 const selectedApplication = ref(null)
 const isModalOpen = ref(false)
+const errorMessage = ref(null)
 
-// Calculate KPIs when component mounts or applications change
-onMounted(() => {
-  kpiStore.calculateKPIs()
+onMounted(async () => {
+  try {
+    await store.fetchApplications()
+    kpiStore.calculateKPIs()
+  } catch (error) {
+    console.error('Failed to load applications:', error)
+  }
 })
 
 watch(() => store.applications, () => {
@@ -38,19 +43,26 @@ function closeModal() {
   selectedApplication.value = null
 }
 
-    function submit() {
-        store.addApplication({
-            company: company.value,
-            title: title.value,
-        status: selectedStatus.value,
-        })
+    async function submit() {
+        errorMessage.value = null
+        try {
+            await store.addApplication({
+                company: company.value,
+                title: title.value,
+                status: selectedStatus.value,
+            })
 
-        company.value = ''
-        title.value = ''
-    selectedStatus.value = 'todo'
-    
-    // Refresh KPIs after adding application
-    kpiStore.calculateKPIs()
+            company.value = ''
+            title.value = ''
+            selectedStatus.value = 'todo'
+            kpiStore.calculateKPIs()
+        } catch (error) {
+            console.error('Failed to add application:', error)
+            errorMessage.value = error.message || 'Erreur lors de l\'ajout de la candidature'
+            setTimeout(() => {
+                errorMessage.value = null
+            }, 5000)
+        }
 }
 
 function goToStatistics() {
@@ -91,6 +103,9 @@ function goToStatistics() {
           </select>
           <button type="submit" class="form-button">Ajouter</button>
     </form>
+        <div v-if="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </div>
       </div>
     </div>
 
@@ -313,6 +328,17 @@ function goToStatistics() {
 
 .form-button:hover {
   background-color: var(--accent-hover, #535bf2);
+}
+
+.error-message {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background-color: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  border-radius: 6px;
+  color: #fca5a5;
+  font-size: 0.875rem;
+  text-align: center;
 }
 
 .board {

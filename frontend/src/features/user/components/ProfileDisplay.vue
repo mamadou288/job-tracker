@@ -10,18 +10,9 @@ const props = defineProps({
 
 const emit = defineEmits(['edit'])
 
-const formattedCreatedAt = computed(() => {
-  if (!props.profile.createdAt) return 'N/A'
-  return new Date(props.profile.createdAt).toLocaleDateString('fr-FR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-})
-
-const formattedUpdatedAt = computed(() => {
-  if (!props.profile.updatedAt) return 'N/A'
-  return new Date(props.profile.updatedAt).toLocaleDateString('fr-FR', {
+const formattedDateJoined = computed(() => {
+  if (!props.profile.dateJoined) return 'N/A'
+  return new Date(props.profile.dateJoined).toLocaleDateString('fr-FR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -48,8 +39,8 @@ function handleEdit() {
         </div>
       </div>
       <div class="profile-title-section">
-        <h2 class="profile-name">{{ profile.name || 'Utilisateur' }}</h2>
-        <p class="profile-role">{{ profile.role || 'Job Seeker' }}</p>
+        <h2 class="profile-name">{{ profile.name || profile.username || 'Utilisateur' }}</h2>
+        <p class="profile-role">{{ profile.username || 'Utilisateur' }}</p>
       </div>
       <button class="edit-button" @click="handleEdit">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -62,34 +53,25 @@ function handleEdit() {
     <div class="profile-content">
       <div class="info-section">
         <div class="info-item">
+          <span class="info-label">Nom d'utilisateur</span>
+          <span class="info-value">{{ profile.username || 'Non renseigné' }}</span>
+        </div>
+
+        <div class="info-item">
           <span class="info-label">Email</span>
           <span class="info-value">{{ profile.email || 'Non renseigné' }}</span>
         </div>
 
-        <div v-if="profile.phone" class="info-item">
-          <span class="info-label">Téléphone</span>
-          <span class="info-value">{{ profile.phone }}</span>
-        </div>
-
-        <div v-if="profile.location" class="info-item">
-          <span class="info-label">Localisation</span>
-          <span class="info-value">{{ profile.location }}</span>
-        </div>
-
-        <div v-if="profile.bio" class="info-item info-item-bio">
-          <span class="info-label">Biographie</span>
-          <p class="info-value-bio">{{ profile.bio }}</p>
+        <div v-if="profile.firstName || profile.lastName" class="info-item">
+          <span class="info-label">Nom complet</span>
+          <span class="info-value">{{ `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'Non renseigné' }}</span>
         </div>
       </div>
 
       <div class="metadata-section">
         <div class="metadata-item">
           <span class="metadata-label">Membre depuis</span>
-          <span class="metadata-value">{{ formattedCreatedAt }}</span>
-        </div>
-        <div class="metadata-item">
-          <span class="metadata-label">Dernière mise à jour</span>
-          <span class="metadata-value">{{ formattedUpdatedAt }}</span>
+          <span class="metadata-value">{{ formattedDateJoined }}</span>
         </div>
       </div>
     </div>

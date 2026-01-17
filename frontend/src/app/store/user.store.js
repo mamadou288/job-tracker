@@ -1,59 +1,80 @@
 import { defineStore } from 'pinia'
+import * as userService from '../../features/user/services/user.service'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
     profile: {
-      id: 1,
-      name: 'User',
-      email: 'user@example.com',
-      phone: '',
-      location: '',
-      bio: '',
-      avatar: '',
-      role: 'Job Seeker',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      id: null,
+      username: '',
+      email: '',
+      firstName: '',
+      lastName: '',
+      dateJoined: null,
     },
     loading: false,
+    error: null,
     lastUpdated: null,
   }),
 
   getters: {
     id: (state) => state.profile.id,
-    name: (state) => state.profile.name,
+    username: (state) => state.profile.username,
     email: (state) => state.profile.email,
-    phone: (state) => state.profile.phone,
-    location: (state) => state.profile.location,
-    bio: (state) => state.profile.bio,
-    avatar: (state) => state.profile.avatar,
-    role: (state) => state.profile.role,
-    createdAt: (state) => state.profile.createdAt,
-    updatedAt: (state) => state.profile.updatedAt,
+    firstName: (state) => state.profile.firstName,
+    lastName: (state) => state.profile.lastName,
+    name: (state) => {
+      if (state.profile.firstName || state.profile.lastName) {
+        return `${state.profile.firstName || ''} ${state.profile.lastName || ''}`.trim()
+      }
+      return state.profile.username || 'User'
+    },
     fullProfile: (state) => state.profile,
   },
 
   actions: {
-    updateProfile(profileData) {
-      const now = new Date().toISOString()
-      this.profile = {
-        ...this.profile,
-        ...profileData,
-        updatedAt: now,
-      }
-      this.lastUpdated = now
-    },
-
-    async fetchProfile() {
+    /**
+     * Charge le profil utilisateur depuis l'API
+     * @param {number} id - L'ID de l'utilisateur (par défaut: 1 pour le MVP)
+     */
+    async fetchProfile(id = 1) {
       this.loading = true
+      this.error = null
       try {
-        // TODO: Replace with actual API call
-        // const response = await userService.getProfile()
-        // this.profile = response.data
-        
-        // For now, use mock data from state
+        const data = await userService.getProfile(id)
+        this.profile = data
         this.lastUpdated = new Date().toISOString()
       } catch (error) {
         console.error('Error fetching profile:', error)
+        this.error = error.message || 'Erreur lors du chargement du profil'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    /**
+     * Met à jour le profil utilisateur via l'API
+     * @param {Object} profileData - Les données à mettre à jour
+     */
+    async updateProfile(profileData) {
+      if (!this.profile.id) {
+        throw new Error('Aucun profil chargé')
+      }
+
+      this.loading = true
+      this.error = null
+      try {
+        const updatedProfile = await userService.updateProfile(this.profile.id, profileData)
+        this.profile = {
+          ...this.profile,
+          ...updatedProfile,
+        }
+        this.lastUpdated = new Date().toISOString()
+        return updatedProfile
+      } catch (error) {
+        console.error('Error updating profile:', error)
+        this.error = error.message || 'Erreur lors de la mise à jour du profil'
+        throw error
       } finally {
         this.loading = false
       }
@@ -61,18 +82,15 @@ export const useUserStore = defineStore('user', {
 
     resetProfile() {
       this.profile = {
-        id: 1,
-        name: 'User',
-        email: 'user@example.com',
-        phone: '',
-        location: '',
-        bio: '',
-        avatar: '',
-        role: 'Job Seeker',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        id: null,
+        username: '',
+        email: '',
+        firstName: '',
+        lastName: '',
+        dateJoined: null,
       }
       this.lastUpdated = null
+      this.error = null
     },
   },
 })

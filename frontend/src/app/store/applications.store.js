@@ -1,73 +1,106 @@
 import { defineStore } from 'pinia'
+import * as applicationService from '../../features/applications/services/application.service'
 
 export const useApplicationsStore = defineStore('applications', {
   state: () => ({
-    applications: [
-            {
-                id: 1,
-                company: 'BNP Paribas',
-                title: 'Backend Django Developer',
-                status: 'applied',
-                createdAt: '2026-01-13T10:00:00Z',
-                updatedAt: '2026-01-13T10:00:00Z',
-            },
-            {
-                id: 2,
-                company: 'Doctolib',
-                title: 'Frontend Vue Developer',
-                status: 'interview',
-                createdAt: '2026-01-13T10:00:00Z',
-                updatedAt: '2026-01-13T10:00:00Z',
-            },
-            {
-                id: 3,
-                company: 'Google',
-                title: 'Software Engineer',
-                status: 'todo',
-                createdAt: '2026-01-13T10:00:00Z',
-                updatedAt: '2026-01-13T10:00:00Z',
-            },
-        ]
-    }),
+    applications: [],
+    loading: false,
+    error: null,
+  }),
 
-    getters: {
-        applicationsByStatus: (state) => {
-            return (status) =>
-                state.applications.filter((a) => a.status === status)
-        },
+  getters: {
+    applicationsByStatus: (state) => {
+      return (status) => {
+        if (!Array.isArray(state.applications)) {
+          return []
+        }
+        return state.applications.filter((a) => a.status === status)
+      }
+    },
+  },
+
+  actions: {
+    async fetchApplications() {
+      this.loading = true
+      this.error = null
+      try {
+        const data = await applicationService.getApplications()
+        this.applications = Array.isArray(data) ? data : (data?.results || [])
+      } catch (error) {
+        console.error('Error fetching applications:', error)
+        this.error = error.message || 'Erreur lors du chargement des candidatures'
+        throw error
+      } finally {
+        this.loading = false
+      }
     },
 
-    actions: {
-        addApplication({ company, title, status = 'todo' }) {
-            const cleanCompany = company.trim()
-            const cleanTitle = title.trim()
+    async addApplication({ company, title, status = 'todo' }) {
+      const cleanCompany = company.trim()
+      const cleanTitle = title.trim()
 
-            if (!cleanCompany || !cleanTitle) return
+      if (!cleanCompany || !cleanTitle) {
+        throw new Error('Le nom de l\'entreprise et le poste sont requis')
+      }
 
-            // Validate status
-            const validStatuses = ['todo', 'applied', 'interview', 'offer', 'rejected']
-            const finalStatus = validStatuses.includes(status) ? status : 'todo'
+      const validStatuses = ['todo', 'applied', 'interview', 'offer', 'rejected']
+      const finalStatus = validStatuses.includes(status) ? status : 'todo'
 
-            const now = new Date().toISOString()
-            const newApp = {
-                id: Date.now(),
-                company,
-                title,
-                status: finalStatus,
-                createdAt: now,
-                updatedAt: now,
-            }
-
-            this.applications.push(newApp)
-        },
-
-        updateApplicationStatus(applicationId, newStatus) {
-            const application = this.applications.find(app => app.id === applicationId)
-            if (application) {
-                application.status = newStatus
-                application.updatedAt = new Date().toISOString()
-            }
-        },
+      this.loading = true
+      this.error = null
+      try {
+        const newApp = await applicationService.createApplication({
+          company: cleanCompany,
+          title: cleanTitle,
+          status: finalStatus,
+        })
+        this.applications.push(newApp)
+        return newApp
+      } catch (error) {
+        console.error('Error creating application:', error)
+        this.error = error.message || 'Erreur lors de la création de la candidature'
+        throw error
+      } finally {
+        this.loading = false
+      }
     },
+
+    async updateApplicationStatus(applicationId, newStatus) {
+      const application = this.applications.find(app => app.id === applicationId)
+      if (!application) {
+        throw new Error('Candidature introuvable')
+      }
+
+      this.error = null
+      try {
+        const updatedApp = await applicationService.updateApplication(applicationId, {
+          status: newStatus,
+        })
+        
+        const index = this.applications.findIndex(app => app.id === applicationId)
+        if (index !== -1) {
+          this.applications[index] = updatedApp
+        }
+        
+        return updatedApp
+      } catch (error) {
+        console.error('Error updating application status:', error)
+        this.error = error.message || 'Erreur lors de la mise à jour du statut'
+        throw error
+      }
+    },
+
+    async deleteApplication(applicationId) {
+      this.error = null
+      try {
+        await applicationService.deleteApplication(applicationId)
+        this.applications = this.applications.filter(app => app.id !== applicationId)
+      } catch (error) {
+        console.error('Error deleting application:', error)
+        this.error = error.message || 'Erreur lors de la suppression de la candidature'
+        throw error
+      }
+    },
+  },
 
 })

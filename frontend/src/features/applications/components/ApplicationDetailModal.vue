@@ -25,9 +25,14 @@ watch(() => props.application, (newApp) => {
   }
 }, { immediate: true })
 
-function handleSave() {
+async function handleSave() {
   if (props.application && props.application.status !== selectedStatus.value) {
-    store.updateApplicationStatus(props.application.id, selectedStatus.value)
+    try {
+      await store.updateApplicationStatus(props.application.id, selectedStatus.value)
+    } catch (error) {
+      console.error('Failed to update application status:', error)
+      // TODO: Afficher un message d'erreur à l'utilisateur
+    }
   }
   handleClose()
 }

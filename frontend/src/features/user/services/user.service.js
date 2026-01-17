@@ -1,63 +1,26 @@
 /**
  * Service pour gérer les appels API liés au profil utilisateur
- * 
- * Ce service est un placeholder pour la future intégration backend.
- * Pour l'instant, il retourne des données mock.
  */
+
+import apiClient from '../../../shared/api/client'
 
 /**
  * Récupère le profil de l'utilisateur depuis l'API
+ * @param {number} id - L'ID de l'utilisateur
  * @returns {Promise<Object>} Les données du profil utilisateur
  */
-export async function getProfile() {
-  // TODO: Replace with actual API call
-  // const response = await fetch('/api/user/profile')
-  // return response.json()
-  
-  // Mock data for now
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        id: 1,
-        name: 'User',
-        email: 'user@example.com',
-        phone: '',
-        location: '',
-        bio: '',
-        avatar: '',
-        role: 'Job Seeker',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      })
-    }, 500) // Simulate network delay
-  })
+export async function getProfile(id) {
+  return apiClient.get(`/api/users/${id}/`)
 }
 
 /**
  * Met à jour le profil de l'utilisateur via l'API
+ * @param {number} id - L'ID de l'utilisateur
  * @param {Object} profileData - Les données du profil à mettre à jour
  * @returns {Promise<Object>} Le profil mis à jour
  */
-export async function updateProfile(profileData) {
-  // TODO: Replace with actual API call
-  // const response = await fetch('/api/user/profile', {
-  //   method: 'PUT',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify(profileData),
-  // })
-  // return response.json()
-  
-  // Mock update for now
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        ...profileData,
-        updatedAt: new Date().toISOString(),
-      })
-    }, 500) // Simulate network delay
-  })
+export async function updateProfile(id, profileData) {
+  return apiClient.patch(`/api/users/${id}/`, profileData)
 }
 
 /**

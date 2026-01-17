@@ -14,20 +14,16 @@ const emit = defineEmits(['save', 'cancel'])
 const store = useUserStore()
 
 const formData = ref({
-  name: props.profile.name || '',
   email: props.profile.email || '',
-  phone: props.profile.phone || '',
-  location: props.profile.location || '',
-  bio: props.profile.bio || '',
+  firstName: props.profile.firstName || '',
+  lastName: props.profile.lastName || '',
 })
 
 watch(() => props.profile, (newProfile) => {
   formData.value = {
-    name: newProfile.name || '',
     email: newProfile.email || '',
-    phone: newProfile.phone || '',
-    location: newProfile.location || '',
-    bio: newProfile.bio || '',
+    firstName: newProfile.firstName || '',
+    lastName: newProfile.lastName || '',
   }
 }, { immediate: true })
 
@@ -41,10 +37,6 @@ function validateEmail(email) {
 function validate() {
   errors.value = {}
   
-  if (!formData.value.name.trim()) {
-    errors.value.name = 'Le nom est requis'
-  }
-  
   if (!formData.value.email.trim()) {
     errors.value.email = 'L\'email est requis'
   } else if (!validateEmail(formData.value.email)) {
@@ -54,21 +46,24 @@ function validate() {
   return Object.keys(errors.value).length === 0
 }
 
-function handleSave() {
+async function handleSave() {
   if (validate()) {
-    store.updateProfile(formData.value)
-    emit('save', formData.value)
+    try {
+      await store.updateProfile(formData.value)
+      emit('save', formData.value)
+    } catch (error) {
+      console.error('Failed to update profile:', error)
+      // TODO: Afficher un message d'erreur à l'utilisateur
+    }
   }
 }
 
 function handleCancel() {
   // Reset form to original values
   formData.value = {
-    name: props.profile.name || '',
     email: props.profile.email || '',
-    phone: props.profile.phone || '',
-    location: props.profile.location || '',
-    bio: props.profile.bio || '',
+    firstName: props.profile.firstName || '',
+    lastName: props.profile.lastName || '',
   }
   errors.value = {}
   emit('cancel')
@@ -81,17 +76,25 @@ function handleCancel() {
     
     <form @submit.prevent="handleSave" class="form">
       <div class="form-group">
-        <label for="name" class="form-label">Nom complet *</label>
+        <label for="firstName" class="form-label">Prénom</label>
         <input
-          id="name"
-          v-model="formData.name"
+          id="firstName"
+          v-model="formData.firstName"
           type="text"
           class="form-input"
-          :class="{ 'form-input-error': errors.name }"
-          placeholder="Votre nom"
-          required
+          placeholder="Votre prénom"
         />
-        <span v-if="errors.name" class="error-message">{{ errors.name }}</span>
+      </div>
+
+      <div class="form-group">
+        <label for="lastName" class="form-label">Nom</label>
+        <input
+          id="lastName"
+          v-model="formData.lastName"
+          type="text"
+          class="form-input"
+          placeholder="Votre nom"
+        />
       </div>
 
       <div class="form-group">
@@ -106,39 +109,6 @@ function handleCancel() {
           required
         />
         <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
-      </div>
-
-      <div class="form-group">
-        <label for="phone" class="form-label">Téléphone</label>
-        <input
-          id="phone"
-          v-model="formData.phone"
-          type="tel"
-          class="form-input"
-          placeholder="+33 6 12 34 56 78"
-        />
-      </div>
-
-      <div class="form-group">
-        <label for="location" class="form-label">Localisation</label>
-        <input
-          id="location"
-          v-model="formData.location"
-          type="text"
-          class="form-input"
-          placeholder="Paris, France"
-        />
-      </div>
-
-      <div class="form-group">
-        <label for="bio" class="form-label">Biographie</label>
-        <textarea
-          id="bio"
-          v-model="formData.bio"
-          class="form-textarea"
-          rows="4"
-          placeholder="Parlez-nous de vous..."
-        ></textarea>
       </div>
 
       <div class="form-actions">
