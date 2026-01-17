@@ -4,6 +4,6 @@ import AppLayout from './shared/layouts/AppLayout.vue'
 
 <template>
   <AppLayout>
-    <router-view />
+  <router-view />
   </AppLayout>
 </template>

@@ -1,18 +1,18 @@
 <script setup>
-import { useApplicationsStore } from '../app/store/applications.store';
+    import { useApplicationsStore } from '../app/store/applications.store';
 import { useKPIStore } from '../app/store/kpi.store';
-import { STATUSES } from '../features/applications/model/statuses';
+    import { STATUSES } from '../features/applications/model/statuses';
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ApplicationCard from '../features/applications/components/ApplicationCard.vue'
 import ApplicationDetailModal from '../features/applications/components/ApplicationDetailModal.vue'
 import KPICard from '../shared/ui/KPICard.vue'
 
-const company = ref('')
-const title = ref('')
+    const company = ref('')
+    const title = ref('')
 const selectedStatus = ref('todo')
 
-const store = useApplicationsStore()
+    const store = useApplicationsStore()
 const kpiStore = useKPIStore()
 const router = useRouter()
 
@@ -38,15 +38,15 @@ function closeModal() {
   selectedApplication.value = null
 }
 
-function submit() {
-    store.addApplication({
-        company: company.value,
-        title: title.value,
+    function submit() {
+        store.addApplication({
+            company: company.value,
+            title: title.value,
         status: selectedStatus.value,
-    })
+        })
 
-    company.value = ''
-    title.value = ''
+        company.value = ''
+        title.value = ''
     selectedStatus.value = 'todo'
     
     // Refresh KPIs after adding application
@@ -55,7 +55,7 @@ function submit() {
 
 function goToStatistics() {
   router.push('/statistics')
-}
+    }
 </script>
 
 <template>
@@ -90,7 +90,7 @@ function goToStatistics() {
             </option>
           </select>
           <button type="submit" class="form-button">Ajouter</button>
-        </form>
+    </form>
       </div>
     </div>
 
@@ -133,7 +133,7 @@ function goToStatistics() {
     <!-- Board Section - Main Focus -->
     <div class="board-section">
       <h2 class="section-title">Tableau des candidatures</h2>
-      <div class="board">
+    <div class="board">
       <div 
         v-for="status in STATUSES" 
         :key="status.key" 
