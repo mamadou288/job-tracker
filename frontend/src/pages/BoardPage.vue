@@ -1,18 +1,32 @@
 <script setup>
 import { useApplicationsStore } from '../app/store/applications.store';
+import { useKPIStore } from '../app/store/kpi.store';
 import { STATUSES } from '../features/applications/model/statuses';
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import ApplicationCard from '../features/applications/components/ApplicationCard.vue'
 import ApplicationDetailModal from '../features/applications/components/ApplicationDetailModal.vue'
+import KPICard from '../shared/ui/KPICard.vue'
 
 const company = ref('')
 const title = ref('')
 const selectedStatus = ref('todo')
 
 const store = useApplicationsStore()
+const kpiStore = useKPIStore()
+const router = useRouter()
 
 const selectedApplication = ref(null)
 const isModalOpen = ref(false)
+
+// Calculate KPIs when component mounts or applications change
+onMounted(() => {
+  kpiStore.calculateKPIs()
+})
+
+watch(() => store.applications, () => {
+  kpiStore.calculateKPIs()
+}, { deep: true })
 
 function openModal(application) {
   selectedApplication.value = application
@@ -34,6 +48,13 @@ function submit() {
     company.value = ''
     title.value = ''
     selectedStatus.value = 'todo'
+    
+    // Refresh KPIs after adding application
+    kpiStore.calculateKPIs()
+}
+
+function goToStatistics() {
+  router.push('/statistics')
 }
 </script>
 
@@ -41,6 +62,41 @@ function submit() {
   <div class="board-page">
     <div class="page-header">
       <h1 class="page-title">Board</h1>
+    </div>
+
+    <!-- KPI Summary Section -->
+    <div class="kpi-section">
+      <div class="kpi-grid">
+        <KPICard
+          title="Total Candidatures"
+          :value="kpiStore.totalApplications"
+        />
+        <KPICard
+          title="Taux de Réponse"
+          :value="`${kpiStore.responseRate}%`"
+          subtitle="Postulé + Refusé"
+        />
+        <KPICard
+          title="Taux de Conversion"
+          :value="`${kpiStore.conversionRate}%`"
+          subtitle="Entretien → Offre"
+        />
+        <KPICard
+          title="Taux de Succès"
+          :value="`${kpiStore.successRate}%`"
+          subtitle="Offres / Total"
+        />
+        <KPICard
+          title="Cette Semaine"
+          :value="kpiStore.recentActivity.thisWeek"
+          subtitle="Nouvelles candidatures"
+        />
+      </div>
+      <div class="kpi-actions">
+        <button class="view-stats-button" @click="goToStatistics">
+          Voir toutes les stats →
+        </button>
+      </div>
     </div>
 
     <div class="add-form-container">
@@ -117,6 +173,45 @@ function submit() {
   font-size: 2rem;
   font-weight: 600;
   margin: 0;
+  color: var(--text-primary, #ffffff);
+}
+
+.kpi-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: var(--card-bg, #2d2d2d);
+  border: 1px solid var(--border-color, #3d3d3d);
+  border-radius: 8px;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.kpi-actions {
+  display: flex;
+  justify-content: center;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color, #3d3d3d);
+}
+
+.view-stats-button {
+  background: none;
+  border: 1px solid var(--accent-color, #646cff);
+  color: var(--accent-color, #646cff);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-stats-button:hover {
+  background-color: var(--accent-color, #646cff);
   color: var(--text-primary, #ffffff);
 }
 
