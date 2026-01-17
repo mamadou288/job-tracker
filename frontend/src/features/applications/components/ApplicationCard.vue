@@ -1,14 +1,20 @@
 <script setup>
-    defineProps({
-    application: {
-        type: Object,
-        required: true,
-    },
-    })
+defineProps({
+  application: {
+    type: Object,
+    required: true,
+  },
+})
+
+const emit = defineEmits(['click'])
+
+function handleClick() {
+  emit('click')
+}
 </script>
 
 <template>
-  <div class="application-card">
+  <div class="application-card" @click="handleClick">
     <div class="card-content">
       <h3 class="card-company">{{ application.company }}</h3>
       <p class="card-title">{{ application.title }}</p>
@@ -23,7 +29,7 @@
     border-radius: 8px;
     padding: 1rem;
     margin-bottom: 0.75rem;
-    cursor: grab;
+    cursor: pointer;
     transition: all 0.2s ease;
     user-select: none;
     }
@@ -33,10 +39,6 @@
     border-color: var(--accent-color, #646cff);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .application-card:active {
-    cursor: grabbing;
     }
 
     .card-content {

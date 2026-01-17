@@ -38,18 +38,22 @@ export const useApplicationsStore = defineStore('applications', {
     },
 
     actions: {
-        addApplication({ company, title }) {
+        addApplication({ company, title, status = 'todo' }) {
             const cleanCompany = company.trim()
             const cleanTitle = title.trim()
 
             if (!cleanCompany || !cleanTitle) return
+
+            // Validate status
+            const validStatuses = ['todo', 'applied', 'interview', 'offer', 'rejected']
+            const finalStatus = validStatuses.includes(status) ? status : 'todo'
 
             const now = new Date().toISOString()
             const newApp = {
                 id: Date.now(),
                 company,
                 title,
-                status: 'todo',
+                status: finalStatus,
                 createdAt: now,
                 updatedAt: now,
             }

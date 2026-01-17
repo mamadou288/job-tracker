@@ -3,20 +3,37 @@ import { useApplicationsStore } from '../app/store/applications.store';
 import { STATUSES } from '../features/applications/model/statuses';
 import { ref } from 'vue'
 import ApplicationCard from '../features/applications/components/ApplicationCard.vue'
+import ApplicationDetailModal from '../features/applications/components/ApplicationDetailModal.vue'
 
 const company = ref('')
 const title = ref('')
+const selectedStatus = ref('todo')
 
 const store = useApplicationsStore()
+
+const selectedApplication = ref(null)
+const isModalOpen = ref(false)
+
+function openModal(application) {
+  selectedApplication.value = application
+  isModalOpen.value = true
+}
+
+function closeModal() {
+  isModalOpen.value = false
+  selectedApplication.value = null
+}
 
 function submit() {
     store.addApplication({
         company: company.value,
         title: title.value,
+        status: selectedStatus.value,
     })
 
     company.value = ''
     title.value = ''
+    selectedStatus.value = 'todo'
 }
 </script>
 
@@ -40,6 +57,14 @@ function submit() {
           class="form-input"
           required
         />
+        <select 
+          v-model="selectedStatus" 
+          class="form-select"
+        >
+          <option v-for="status in STATUSES" :key="status.key" :value="status.key">
+            {{ status.label }}
+          </option>
+        </select>
         <button type="submit" class="form-button">Ajouter</button>
       </form>
     </div>
@@ -61,11 +86,18 @@ function submit() {
           <ApplicationCard 
             v-for="app in store.applicationsByStatus(status.key)" 
             :key="app.id" 
-            :application="app" 
+            :application="app"
+            @click="openModal(app)"
           />
         </div>
       </div>
     </div>
+
+    <ApplicationDetailModal
+      :application="selectedApplication"
+      :is-open="isModalOpen"
+      @close="closeModal"
+    />
   </div>
 </template>
 
@@ -119,6 +151,28 @@ function submit() {
 .form-input:focus {
   outline: none;
   border-color: var(--accent-color, #646cff);
+}
+
+.form-select {
+  flex: 0 0 auto;
+  min-width: 150px;
+  padding: 0.75rem;
+  background-color: var(--input-bg, #3d3d3d);
+  border: 1px solid var(--border-color, #4d4d4d);
+  border-radius: 6px;
+  color: var(--text-primary, #ffffff);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--accent-color, #646cff);
+}
+
+.form-select option {
+  background-color: var(--input-bg, #3d3d3d);
+  color: var(--text-primary, #ffffff);
 }
 
 .form-button {
