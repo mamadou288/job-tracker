@@ -1,26 +1,234 @@
 <script setup>
 import { useApplicationsStore } from '../app/store/applications.store';
 import { STATUSES } from '../features/applications/model/statuses';
+import { ref } from 'vue'
+import ApplicationCard from '../features/applications/components/ApplicationCard.vue'
 
+const company = ref('')
+const title = ref('')
 
 const store = useApplicationsStore()
+
+function submit() {
+    store.addApplication({
+        company: company.value,
+        title: title.value,
+    })
+
+    company.value = ''
+    title.value = ''
+}
 </script>
 
 <template>
-  <div>
-    <h1>Board</h1>
+  <div class="board-page">
+    <div class="page-header">
+      <h1 class="page-title">Board</h1>
+    </div>
+
+    <div class="add-form-container">
+      <form @submit.prevent="submit" class="add-form">
+        <input 
+          v-model="company" 
+          placeholder="Entreprise" 
+          class="form-input"
+          required
+        />
+        <input 
+          v-model="title" 
+          placeholder="Poste" 
+          class="form-input"
+          required
+        />
+        <button type="submit" class="form-button">Ajouter</button>
+      </form>
+    </div>
 
     <div class="board">
-      <div v-for="s in STATUSES" :key="s.key" class="column">
-        <h2>{{ s.label }}</h2>
-
-        <ul>
-          <li v-for="app in store.applicationsByStatus(s.key)" :key="app.id">
-            {{ app.company }} — {{ app.title }}
-          </li>
-        </ul>
+      <div 
+        v-for="status in STATUSES" 
+        :key="status.key" 
+        class="board-column"
+      >
+        <div class="column-header">
+          <h2 class="column-title">{{ status.label }}</h2>
+          <span class="column-count">
+            {{ store.applicationsByStatus(status.key).length }}
+          </span>
+        </div>
+        
+        <div class="column-content">
+          <ApplicationCard 
+            v-for="app in store.applicationsByStatus(status.key)" 
+            :key="app.id" 
+            :application="app" 
+          />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
+<style scoped>
+.board-page {
+  padding: 2rem;
+  min-height: 100%;
+  background-color: var(--bg-primary, #1a1a1a);
+  color: var(--text-primary, #ffffff);
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary, #ffffff);
+}
+
+.add-form-container {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: var(--card-bg, #2d2d2d);
+  border: 1px solid var(--border-color, #3d3d3d);
+  border-radius: 8px;
+}
+
+.add-form {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.form-input {
+  flex: 1;
+  padding: 0.75rem;
+  background-color: var(--input-bg, #3d3d3d);
+  border: 1px solid var(--border-color, #4d4d4d);
+  border-radius: 6px;
+  color: var(--text-primary, #ffffff);
+  font-size: 0.875rem;
+}
+
+.form-input::placeholder {
+  color: var(--text-secondary, #999);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent-color, #646cff);
+}
+
+.form-button {
+  padding: 0.75rem 1.5rem;
+  background-color: var(--accent-color, #646cff);
+  color: var(--text-primary, #ffffff);
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.form-button:hover {
+  background-color: var(--accent-hover, #535bf2);
+}
+
+.board {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+}
+
+.board-column {
+  flex: 1;
+  min-width: 280px;
+  background-color: var(--card-bg, #2d2d2d);
+  border: 1px solid var(--border-color, #3d3d3d);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 300px);
+}
+
+.column-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color, #3d3d3d);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.column-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary, #999);
+  margin: 0;
+}
+
+.column-count {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #999);
+  background-color: var(--input-bg, #3d3d3d);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+}
+
+.column-content {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  min-height: 200px;
+}
+
+/* Drag and drop styles */
+.column-content.sortable-ghost {
+  opacity: 0.5;
+}
+
+.column-content.sortable-drag {
+  opacity: 0.8;
+}
+
+/* Scrollbar styling */
+.column-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.column-content::-webkit-scrollbar-track {
+  background: var(--input-bg, #3d3d3d);
+  border-radius: 4px;
+}
+
+.column-content::-webkit-scrollbar-thumb {
+  background: var(--border-color, #4d4d4d);
+  border-radius: 4px;
+}
+
+.column-content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary, #999);
+}
+
+.board::-webkit-scrollbar {
+  height: 8px;
+}
+
+.board::-webkit-scrollbar-track {
+  background: var(--bg-primary, #1a1a1a);
+}
+
+.board::-webkit-scrollbar-thumb {
+  background: var(--border-color, #4d4d4d);
+  border-radius: 4px;
+}
+
+.board::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary, #999);
+}
+</style>
